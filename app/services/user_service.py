@@ -1,5 +1,6 @@
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
 
 from models.user import User
 

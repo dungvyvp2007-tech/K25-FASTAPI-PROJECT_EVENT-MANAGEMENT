@@ -5,7 +5,6 @@ from core.exceptions import (
     unhandled_exception_handler,
     validation_exception_handler,
 )
-from core.rate_limit import RateLimitMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from routers import auth, events, event_tasks, users
@@ -15,7 +14,6 @@ app = FastAPI(title="Event Management API")
 
 Base.metadata.create_all(bind=engine)
 
-app.add_middleware(RateLimitMiddleware)
 
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
