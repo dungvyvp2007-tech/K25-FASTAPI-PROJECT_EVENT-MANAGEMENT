@@ -6,6 +6,7 @@ class TaskCreate(BaseModel):
     title: str = Field(min_length=2, max_length=255)
     description: str | None = None
     assignee_id: int | None = None
+    status:str = "TODO"
     priority: str = "MEDIUM"
     due_date: datetime | None = None
 
