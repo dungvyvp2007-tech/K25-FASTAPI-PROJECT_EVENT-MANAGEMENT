@@ -1,7 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -75,6 +75,8 @@ def get_tasks(
     status_filter: str | None = None,
     assignee_id: int | None = None,
     priority: str | None = None,
+    page: int = 1,
+    page_size: int = 3,
 ) -> list[EventTask]:
     event = get_event_or_404(db, event_id)
     ensure_member(db, event, user)
@@ -85,11 +87,14 @@ def get_tasks(
         statement = statement.where(EventTask.assignee_id == assignee_id)
     if priority:
         statement = statement.where(EventTask.priority == priority)
-    return list(
-        db.scalars(
-            statement.order_by(EventTask.due_date.is_(None), EventTask.due_date)
-        ).all()
+    offset_value = (page - 1) * page_size
+    statement = (
+        statement.order_by(EventTask.due_date.is_(None), EventTask.due_date)
+        .offset(offset_value)
+        .limit(page_size)
     )
+
+    return list(db.scalars(statement).all())
 
 
 def get_task_detail(db: Session, task_id: int, user: User) -> EventTask:

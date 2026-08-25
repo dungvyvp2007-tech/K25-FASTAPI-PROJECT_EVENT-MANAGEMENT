@@ -30,11 +30,13 @@ def list_tasks(
     status_filter: str | None = Query(None, alias="status"),
     assignee_id: int | None = None,
     priority: str | None = None,
+    page: int = Query(default=1, ge=1, description="Số trang hiện tại (bắt đầu từ 1)"),
+    page_size: int = Query(default=3, ge=1, le=100, description="Số lượng phần tử trên mỗi trang"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     return task_service.get_tasks(
-        db, event_id, user, status_filter, assignee_id, priority
+        db, event_id, user, status_filter, assignee_id, priority,page,page_size
     )
 
 
