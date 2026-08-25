@@ -1,8 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException, UploadFile, Query
-from sqlalchemy import select
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from core.config import settings
@@ -80,21 +79,21 @@ def get_tasks(
 ) -> list[EventTask]:
     event = get_event_or_404(db, event_id)
     ensure_member(db, event, user)
-    statement = select(EventTask).where(EventTask.event_id == event_id)
+    tasks_query = db.query(EventTask).filter(EventTask.event_id == event_id)
     if status_filter:
-        statement = statement.where(EventTask.status == status_filter)
+        tasks_query = tasks_query.filter(EventTask.status == status_filter)
     if assignee_id:
-        statement = statement.where(EventTask.assignee_id == assignee_id)
+        tasks_query = tasks_query.filter(EventTask.assignee_id == assignee_id)
     if priority:
-        statement = statement.where(EventTask.priority == priority)
+        tasks_query = tasks_query.filter(EventTask.priority == priority)
     offset_value = (page - 1) * page_size
-    statement = (
-        statement.order_by(EventTask.due_date.is_(None), EventTask.due_date)
+    tasks_query = (
+        tasks_query.order_by(EventTask.due_date.is_(None), EventTask.due_date)
         .offset(offset_value)
         .limit(page_size)
     )
 
-    return list(db.scalars(statement).all())
+    return tasks_query.all()
 
 
 def get_task_detail(db: Session, task_id: int, user: User) -> EventTask:
@@ -175,12 +174,11 @@ def add_comment(db: Session, task_id: int, payload: CommentCreate, user: User) -
 def get_comments(db: Session, task_id: int, user: User) -> list[Comment]:
     task = get_task_or_404(db, task_id)
     ensure_member(db, get_event_or_404(db, task.event_id), user)
-    return list(
-        db.scalars(
-            select(Comment)
-            .where(Comment.task_id == task_id)
-            .order_by(Comment.created_at.asc())
-        ).all()
+    return (
+        db.query(Comment)
+        .filter(Comment.task_id == task_id)
+        .order_by(Comment.created_at.asc())
+        .all()
     )
 
 

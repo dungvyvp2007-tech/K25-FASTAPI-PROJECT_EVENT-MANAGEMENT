@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.security import (
@@ -14,7 +13,7 @@ from schemas.auth import LoginRequest, RefreshRequest, RegisterRequest
 
 
 def register_user(db: Session, payload: RegisterRequest) -> dict:
-    if db.scalar(select(User).where(User.email == payload.email)):
+    if db.query(User).filter(User.email == payload.email).first():
         raise HTTPException(status_code=409, detail="Email đã được sử dụng")
     db.add(
         User(
@@ -28,7 +27,7 @@ def register_user(db: Session, payload: RegisterRequest) -> dict:
 
 
 def login_user(db: Session, payload: LoginRequest) -> dict:
-    user = db.scalar(select(User).where(User.email == payload.email))
+    user = db.query(User).filter(User.email == payload.email).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(
             status_code=401, detail="Email hoặc mật khẩu không chính xác"

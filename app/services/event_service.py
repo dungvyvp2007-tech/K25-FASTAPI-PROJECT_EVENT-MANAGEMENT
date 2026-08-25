@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import or_, select,func
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -27,20 +27,20 @@ def create_event(db: Session, payload: EventCreate, user: User) -> Event:
     return event
 
 
-def get_events(db: Session, user: User, search: Optional[str] = None) :
+def get_events(db: Session, user: User, search: Optional[str] = None):
     if user.role == "ADMIN":
-        statement = select(Event)
+        events_query = db.query(Event)
     else:
-        statement = (
-            select(Event)
+        events_query = (
+            db.query(Event)
             .outerjoin(EventStaff)
-            .where(or_(Event.owner_id == user.id, EventStaff.user_id == user.id))
-        )   
+            .filter(or_(Event.owner_id == user.id, EventStaff.user_id == user.id))
+        )
     if search and search.strip():
         search_pattern = f"%{search.strip()}%"
-        statement = statement.where(Event.name.ilike(search_pattern))
+        events_query = events_query.filter(Event.name.ilike(search_pattern))
 
-    return list(db.scalars(statement.order_by(Event.created_at.desc())).unique().all())
+    return events_query.order_by(Event.created_at.desc()).distinct().all()
 
 
 def get_event_detail(db: Session, event_id: int, user: User) -> Event:
@@ -113,20 +113,17 @@ def add_event_member(
 def get_event_members(db: Session, event_id: int, user: User) -> list[EventStaff]:
     event = get_event_or_404(db, event_id)
     ensure_member(db, event, user)
-    return list(
-        db.scalars(select(EventStaff).where(EventStaff.event_id == event_id)).all()
-    )
+    return db.query(EventStaff).filter(EventStaff.event_id == event_id).all()
 
 
 def get_activity_logs(db: Session, event_id: int, user: User) -> list[ActivityLog]:
     event = get_event_or_404(db, event_id)
     ensure_member(db, event, user)
-    return list(
-        db.scalars(
-            select(ActivityLog)
-            .where(ActivityLog.event_id == event_id)
-            .order_by(ActivityLog.created_at.desc())
-        ).all()
+    return (
+        db.query(ActivityLog)
+        .filter(ActivityLog.event_id == event_id)
+        .order_by(ActivityLog.created_at.desc())
+        .all()
     )
 
 
@@ -139,13 +136,13 @@ def remove_event_member(db: Session, event_id: int, user_id: int, user: User) ->
             status_code=404, detail="Không tìm thấy thành viên trong sự kiện"
         )
     if member.role == "OWNER":
-        owner_count = db.scalar(
-            select(func.count())
-            .select_from(EventStaff)
-            .where(
+        owner_count = (
+            db.query(EventStaff)
+            .filter(
                 EventStaff.event_id == event_id,
                 EventStaff.role == "OWNER",
             )
+            .count()
         )
         if owner_count <= 1:
             raise HTTPException(

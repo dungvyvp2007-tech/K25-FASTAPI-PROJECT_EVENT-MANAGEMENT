@@ -1,4 +1,4 @@
-from sqlalchemy import or_, select
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
@@ -10,9 +10,9 @@ def get_my_profile(current_user: User) -> User:
 
 
 def get_users(db: Session, query: str | None = None) -> list[User]:
-    statement = select(User)
+    users_query = db.query(User)
     if query:
-        statement = statement.where(
+        users_query = users_query.filter(
             or_(User.email.contains(query), User.full_name.contains(query))
         )
-    return list(db.scalars(statement.order_by(User.id.desc())).all())
+    return users_query.order_by(User.id.desc()).all()
