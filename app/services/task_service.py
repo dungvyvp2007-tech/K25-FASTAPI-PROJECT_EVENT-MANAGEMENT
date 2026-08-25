@@ -27,6 +27,12 @@ def _ensure_assignee_is_member(
     db: Session, event_id: int, assignee_id: int | None
 ) -> None:
     event = get_event_or_404(db, event_id)
+    assignee = db.get(User, assignee_id) if assignee_id is not None else None
+    if assignee is not None and not assignee.is_active:
+        raise HTTPException(
+            status_code=422,
+            detail="Không thể giao công việc cho tài khoản đã bị khóa",
+        )
     if (
         assignee_id is not None
         and assignee_id != event.owner_id

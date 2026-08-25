@@ -88,8 +88,14 @@ def add_event_member(
 ) -> EventStaff:
     event = get_event_or_404(db, event_id)
     ensure_owner(db, event, user)
-    if not db.get(User, payload.user_id):
+    member_user = db.get(User, payload.user_id)
+    if not member_user:
         raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
+    if not member_user.is_active:
+        raise HTTPException(
+            status_code=422,
+            detail="Không thể thêm tài khoản đã bị khóa vào sự kiện",
+        )
     if payload.user_id == event.owner_id or db.get(
         EventStaff, (event_id, payload.user_id)
     ):
