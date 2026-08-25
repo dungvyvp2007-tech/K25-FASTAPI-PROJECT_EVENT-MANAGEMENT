@@ -7,7 +7,7 @@ from schemas.common import MessageResponse
 from schemas.task import CommentCreate, CommentOut, TaskCreate, TaskOut, TaskUpdate
 from services import task_service
 
-router = APIRouter(tags=["Event Task"],include_in_schema=False)
+router = APIRouter(tags=["Event Task"])
 
 
 @router.post(
