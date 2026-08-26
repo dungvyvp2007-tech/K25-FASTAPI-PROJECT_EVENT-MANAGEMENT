@@ -15,6 +15,7 @@ def create_event(db: Session, payload: EventCreate, user: User) -> Event:
     event = Event(**payload.model_dump(), owner_id=user.id)
     db.add(event)
     db.flush()
+    db.add(EventStaff(event_id=event.id, user_id=user.id, role="OWNER"))
     log_activity(
         db,
         user_id=user.id,

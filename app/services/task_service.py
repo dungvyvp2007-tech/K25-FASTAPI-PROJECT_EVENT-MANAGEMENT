@@ -56,7 +56,7 @@ def create_task(
         raise HTTPException(
             status_code=422, detail="Trạng thái phải là TODO,IN_PROGRESS hoặc DONE"
         )
-    _ensure_assignee_is_member(db, event_id, payload.assignee_id)
+    _ensure_assignee_is_member(db, event_id, payload.assignee_id)       
     task = EventTask(**payload.model_dump(), event_id=event_id)
     db.add(task)
     db.flush()
