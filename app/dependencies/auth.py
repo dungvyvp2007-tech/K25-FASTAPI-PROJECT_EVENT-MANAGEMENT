@@ -17,7 +17,7 @@ def get_current_user(
         if payload.get("type") != "access":
             raise ValueError()
         user = db.get(User, int(payload["sub"]))
-    except (ValueError, KeyError, TypeError):
+    except (ValueError, KeyError, TypeError):   
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token không hợp lệ hoặc đã hết hạn",
