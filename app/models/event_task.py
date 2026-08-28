@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from db.database import Base
 

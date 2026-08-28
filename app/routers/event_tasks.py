@@ -31,7 +31,7 @@ def list_tasks(
     assignee_id: int | None = None,
     priority: str | None = None,
     page: int = Query(default=1, ge=1, description="Số trang hiện tại (bắt đầu từ 1)"),
-    page_size: int = Query(default=3, ge=1, le=100, description="Số lượng phần tử trên mỗi trang"),
+    page_size: int = Query(default=5, ge=1, le=20, description="Số lượng phần tử trên mỗi trang"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):

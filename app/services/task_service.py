@@ -81,7 +81,7 @@ def get_tasks(
     assignee_id: int | None = None,
     priority: str | None = None,
     page: int = 1,
-    page_size: int = 3,
+    page_size: int = 5,
 ) -> list[EventTask]:
     event = get_event_or_404(db, event_id)
     ensure_member(db, event, user)
