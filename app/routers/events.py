@@ -51,7 +51,7 @@ def delete_event(
 
 
 @router.post(
-    "/{event_id}/members", response_model=MemberOut, status_code=status.HTTP_201_CREATED, tags=["Event_Members"]
+    "/{event_id}/members", response_model=MemberOut, status_code=status.HTTP_201_CREATED, tags=["Event Staff"]
 )
 def add_member(
     event_id: int,
@@ -62,21 +62,21 @@ def add_member(
     return event_service.add_event_member(db, event_id, payload, user)
 
 
-@router.get("/{event_id}/members", response_model=list[MemberOut],tags=["Event_Members"])
+@router.get("/{event_id}/members", response_model=list[MemberOut],tags=["Event Staff"])
 def list_members(
     event_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
     return event_service.get_event_members(db, event_id, user)
 
 
-@router.get("/{event_id}/activity-logs", response_model=list[ActivityLogOut],tags=["Event_Members"])
+@router.get("/{event_id}/activity-logs", response_model=list[ActivityLogOut],tags=["Event Staff"])
 def list_activity_logs(
     event_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
     return event_service.get_activity_logs(db, event_id, user)
 
 
-@router.delete("/{event_id}/members/{user_id}", response_model=MessageResponse,tags=["Event_Members"])
+@router.delete("/{event_id}/members/{user_id}", response_model=MessageResponse,tags=["Event Staff"])
 def remove_member(
     event_id: int,
     user_id: int,
